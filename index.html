@@ -318,22 +318,17 @@
     </div>
 
     <!--
-      Form gửi qua FormSubmit (miễn phí, không cần backend).
-      Lần gửi ĐẦU TIÊN sẽ có email kích hoạt gửi tới hộp thư bên dưới — bấm xác nhận là các lần sau nhận bình thường.
-      Đổi địa chỉ email tại thuộc tính action nếu cần.
+      Form gửi ngầm vào Google Form (chỉ chạy nền — người đăng ký không thấy Google Form):
+      mỗi đăng ký thành một dòng trong Google Sheet của chủ trang.
+      Cấu hình endpoint + entry ID tại GFORM cuối trang.
     -->
     <div class="form-card" id="cam-on" style="display:none; text-align:center;">
       <div style="font-size:48px; margin-bottom:12px;">🎉</div>
       <h3 style="color:var(--red); font-size:22px; margin-bottom:10px;">Đăng ký thành công!</h3>
       <p style="color:var(--gray);">Cảm ơn bạn đã tin tưởng Anh Việt Mỹ. Trung tâm sẽ liên hệ với bạn trong vòng 24 giờ.<br>Cần hỗ trợ ngay? Nhắn Zalo <a href="https://zalo.me/0869688153" target="_blank" rel="noopener" style="color:var(--red); font-weight:700;">Ms. Uyên</a>.</p>
     </div>
-    <form class="form-card" action="https://formsubmit.co/vuongnguyen710@gmail.com" method="POST">
-      <input type="hidden" name="_subject" value="[Anh Việt Mỹ] Đăng ký khóa học mới">
-      <input type="hidden" name="_cc" value="uyen@affluence.vn,hello@affluence.vn">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_captcha" value="false">
-      <input type="hidden" name="_next" value="https://anhvietmy.affluence.vn/?sent=1#dang-ky">
-      <input type="text" name="_honey" style="display:none">
+    <form class="form-card" id="form-dang-ky" method="POST">
+      <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
 
       <div class="form-row">
         <div class="field">
@@ -455,11 +450,44 @@
     }, { once: true });
   });
 
-  // Sau khi gửi form thành công (FormSubmit chuyển về ?sent=1) thì hiện lời cảm ơn
-  if (new URLSearchParams(window.location.search).get('sent') === '1') {
-    document.getElementById('cam-on').style.display = 'block';
-    document.querySelector('form.form-card').style.display = 'none';
-  }
+  // Gửi đăng ký ngầm vào Google Form (ghi vào Google Sheet của trung tâm)
+  var GFORM = {
+    action: 'https://docs.google.com/forms/d/e/1FAIpQLSe8b4GW54iiwK3WCSjq1SSBoL4au7uhAnZmVS6A2gavis8afw/formResponse',
+    map: {
+      'Họ và tên': 'entry.2095742149',
+      'Số điện thoại': 'entry.304988050',
+      'Email': 'entry.1102492665',
+      'Độ tuổi học viên': 'entry.41326868',
+      'Khóa học': 'entry.637106804',
+      'Chi nhánh': 'entry.611326982',
+      'Ghi chú': 'entry.2045820812'
+    }
+  };
+
+  document.getElementById('form-dang-ky').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = e.target;
+    if (form.querySelector('[name="_honey"]').value) return;
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Đang gửi...';
+    var src = new FormData(form);
+    var body = new FormData();
+    Object.keys(GFORM.map).forEach(function (name) {
+      body.append(GFORM.map[name], src.get(name) || '');
+    });
+    fetch(GFORM.action, { method: 'POST', mode: 'no-cors', body: body })
+      .then(function () {
+        form.style.display = 'none';
+        document.getElementById('cam-on').style.display = 'block';
+        document.getElementById('cam-on').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      })
+      .catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'Gửi đăng ký ngay 🎉';
+        alert('Gửi không thành công, vui lòng thử lại hoặc nhắn Zalo cho Ms. Uyên nhé!');
+      });
+  });
 </script>
 
 </body>
