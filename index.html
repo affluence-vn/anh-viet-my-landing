@@ -12,6 +12,7 @@
   :root {
     --red: #b31c25;
     --red-dark: #8e141c;
+    --red-light: #c33e46;
     --red-bright: #d21313;
     --cream: #fdf8f3;
     --ink: #2b2b2b;
@@ -43,7 +44,7 @@
   .btn-lg { padding: 16px 40px; font-size: 17px; }
 
   /* ===== Hero ===== */
-  .hero { background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 70%); color: #fff; overflow: hidden; position: relative; }
+  .hero { background: linear-gradient(135deg, var(--red-light) 0%, var(--red) 100%); color: #fff; overflow: hidden; position: relative; }
   .hero::after { content: ''; position: absolute; right: -120px; top: -120px; width: 420px; height: 420px; border-radius: 50%; background: rgba(255,255,255,.06); }
   .hero::before { content: ''; position: absolute; right: 60px; bottom: -160px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,.05); }
   .hero .wrap { padding-top: 72px; padding-bottom: 72px; position: relative; z-index: 1; }
