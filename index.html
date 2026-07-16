@@ -163,6 +163,15 @@
     header .btn { display: none; }
   }
 </style>
+
+<!-- Google Analytics — chung cho mọi landing page affluence.vn -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PGTR9CTWS2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PGTR9CTWS2');
+</script>
 </head>
 <body>
 
@@ -217,6 +226,7 @@
           <p>Để lại thông tin — trung tâm liên hệ trong 24 giờ, kiểm tra trình độ miễn phí.</p>
         </div>
         <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+        <input type="hidden" name="lead_id" value="">
 
         <div class="form-row">
           <div class="field">
@@ -511,20 +521,48 @@
     var btn = form.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.textContent = 'Đang gửi...';
+    var leadId = 'LD-' + Math.random().toString(36).slice(2, 10);
+    form.querySelector('[name="lead_id"]').value = leadId;
     var src = new FormData(form);
     var body = new URLSearchParams();
     body.append('client', CLIENT);
     Object.keys(GFORM.map).forEach(function (name) {
       body.append(GFORM.map[name], src.get(name) || '');
     });
+    body.append('lead_id', leadId);
     // Gửi nền (keepalive) — phản hồi là opaque (no-cors) nên không cần chờ; hiện lời cảm ơn ngay.
     fetch(GFORM.action, { method: 'POST', mode: 'no-cors', body: body, keepalive: true })
       .catch(function () {
         alert('Gửi không thành công, vui lòng nhắn Zalo cho Ms. Uyên nhé!');
       });
+    gtag('event', 'generate_lead', {
+      course: src.get('Khóa học') || '',
+      khu_vuc: src.get('Chi nhánh') || '',
+      age_group: src.get('Độ tuổi học viên') || '',
+      lead_id: leadId
+    });
     form.style.display = 'none';
     document.getElementById('cam-on').style.display = 'block';
     document.getElementById('cam-on').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // ---- GA event hooks ----
+  var formStarted = false;
+  document.getElementById('form-dang-ky').addEventListener('focusin', function () {
+    if (!formStarted) { formStarted = true; gtag('event', 'form_start', { form_id: 'dang-ky' }); }
+  });
+  document.getElementById('khoahoc').addEventListener('change', function (e) {
+    gtag('event', 'course_interest', { course: e.target.value });
+  });
+  document.querySelectorAll('a[href*="zalo.me"]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      var placement = 'other';
+      if (a.classList.contains('call-fab')) placement = 'float';
+      else if (a.closest('#cam-on')) placement = 'thankyou';
+      else if (a.closest('footer')) placement = 'footer';
+      else if (a.closest('.contact-grid')) placement = 'contact';
+      gtag('event', 'zalo_click', { placement: placement });
+    });
   });
 </script>
 
