@@ -489,16 +489,18 @@
   });
 
   // Gửi đăng ký ngầm vào Google Form (ghi vào Google Sheet của trung tâm)
+  // Gửi vào shared Affluence webhook (email từ hello@affluence.vn). map: field name -> tên tham số webhook.
+  var CLIENT = 'anhvietmy';
   var GFORM = {
-    action: 'https://docs.google.com/forms/d/e/1FAIpQLSe8b4GW54iiwK3WCSjq1SSBoL4au7uhAnZmVS6A2gavis8afw/formResponse',
+    action: 'https://script.google.com/macros/s/AKfycbzGsRtSIzAHBPjuWWGrtaoNoChTBQm57FolpeP4jTMVaZ9IHPx8LEurANO2TolaIEvW/exec',
     map: {
-      'Họ và tên': 'entry.2095742149',
-      'Số điện thoại': 'entry.304988050',
-      'Email': 'entry.1102492665',
-      'Độ tuổi học viên': 'entry.41326868',
-      'Khóa học': 'entry.637106804',
-      'Chi nhánh': 'entry.611326982',
-      'Ghi chú': 'entry.2045820812'
+      'Họ và tên': 'ho_ten',
+      'Số điện thoại': 'dien_thoai',
+      'Email': 'email',
+      'Độ tuổi học viên': 'do_tuoi',
+      'Khóa học': 'khoa_hoc',
+      'Chi nhánh': 'chi_nhanh',
+      'Ghi chú': 'loi_nhan'
     }
   };
 
@@ -510,7 +512,8 @@
     btn.disabled = true;
     btn.textContent = 'Đang gửi...';
     var src = new FormData(form);
-    var body = new FormData();
+    var body = new URLSearchParams();
+    body.append('client', CLIENT);
     Object.keys(GFORM.map).forEach(function (name) {
       body.append(GFORM.map[name], src.get(name) || '');
     });
