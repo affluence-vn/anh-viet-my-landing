@@ -517,17 +517,14 @@
     Object.keys(GFORM.map).forEach(function (name) {
       body.append(GFORM.map[name], src.get(name) || '');
     });
-    fetch(GFORM.action, { method: 'POST', mode: 'no-cors', body: body })
-      .then(function () {
-        form.style.display = 'none';
-        document.getElementById('cam-on').style.display = 'block';
-        document.getElementById('cam-on').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      })
+    // Gửi nền (keepalive) — phản hồi là opaque (no-cors) nên không cần chờ; hiện lời cảm ơn ngay.
+    fetch(GFORM.action, { method: 'POST', mode: 'no-cors', body: body, keepalive: true })
       .catch(function () {
-        btn.disabled = false;
-        btn.textContent = 'Gửi đăng ký ngay 🎉';
-        alert('Gửi không thành công, vui lòng thử lại hoặc nhắn Zalo cho Ms. Uyên nhé!');
+        alert('Gửi không thành công, vui lòng nhắn Zalo cho Ms. Uyên nhé!');
       });
+    form.style.display = 'none';
+    document.getElementById('cam-on').style.display = 'block';
+    document.getElementById('cam-on').scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 </script>
 
